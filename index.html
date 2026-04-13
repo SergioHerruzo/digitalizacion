@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glovo | Transformació Digital</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <span class="glovo-yellow">Glovo</span> <span class="tag">Digital</span>
+            </div>
+            <nav>
+                <ul>
+                    <li>Inici</li>
+                    <li>Comandes</li>
+                    <li>Perfil</li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <section class="hero">
+                <h1>Lliuraments intel·ligents amb IA</h1>
+                <p>Explora com la transformació digital millora la teva experiència.</p>
+            </section>
+
+            <section class="chat-interface" id="chat-win">
+                <div class="chat-header">
+                    <h3>Assistent Intencions (Python Engine)</h3>
+                    <span class="status-dot"></span>
+                </div>
+                <div class="chat-body" id="chat-body">
+                    <div class="message bot">Hola! Com puc ajudar-te amb la teva comanda avui?</div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" placeholder="Escriu la teva consulta..." id="user-input">
+                    <button id="send-btn">Enviar</button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Glovo Academy Learner Lab Project</p>
+        </footer>
+    </div>
+    <script>
+        const chatBody = document.getElementById('chat-body');
+        const input = document.getElementById('user-input');
+
+        const sendMessage = async () => {
+            const text = input.value.trim();
+            if (text === '') return;
+            
+            // Missatge usuari
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user';
+            userMsg.innerText = text;
+            chatBody.appendChild(userMsg);
+            
+            input.value = '';
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            // Simulació de "pensant"
+            const typingMsg = document.createElement('div');
+            typingMsg.className = 'message bot';
+            typingMsg.innerText = "...";
+            chatBody.appendChild(typingMsg);
+
+            try {
+                // Crida real a l'API de Python (Flask)
+                const response = await fetch('http://localhost:5000/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+                
+                const data = await response.json();
+                typingMsg.innerText = data.reply;
+            } catch (error) {
+                typingMsg.innerText = "Error: El servidor de Python no està actiu. Executa 'python chatbot.py' primer.";
+                console.error("Error connectant amb el backend:", error);
+            }
+            
+            chatBody.scrollTop = chatBody.scrollHeight;
+        };
+
+        document.getElementById('send-btn').addEventListener('click', sendMessage);
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>
