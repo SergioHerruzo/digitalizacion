@@ -16,19 +16,29 @@ except:
 
 class GlovoChatbot:
     def __init__(self):
+        # Memòria temporal per a les sessions (Context)
+        self.sessions_context = {} 
         try:
             self.dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
             self.table = self.dynamodb.Table('GlovoChatHistory')
         except:
             self.table = None
 
-    def analyze_intent(self, text):
+    def analyze_intent(self, text, session_id):
         if not nlp: return "error_model", []
         doc = nlp(text)
         entities = [(ent.text, ent.label_) for ent in doc.ents]
-        
         lower_text = text.lower()
         
+        # Si tenim un context obert, certs intents canvien
+        context = self.sessions_context.get(session_id)
+        
+        if context == "esperant_resolucio":
+            if any(w in lower_text for w in ["dinero", "diners", "tornem", "reembors", "reembolso"]):
+                return "resolucio_diners", entities
+            elif any(w in lower_text for w in ["portem", "traer", "nou", "nuevo", "enviar"]):
+                return "resolucio_producte", entities
+
         # Diccionari de paraules clau per intents (ordenat per prioritat)
         intents_config = [
             ("incidencia", ["falta", "faltan", "malament", "mal", "equivocat", "equivocado", "reclamar", "problema", "no és el que he demanat"]),
@@ -57,14 +67,26 @@ class GlovoChatbot:
         return random.randint(20, 50)
 
     def respond(self, session_id, text):
-        intent, entities = self.analyze_intent(text)
+        intent, entities = self.analyze_intent(text, session_id)
         locations = [e[0] for e in entities if e[1] == 'LOC']
         
         # Respostes amb personalitat i cercania 💛
         if intent == "incidencia":
+            self.sessions_context[session_id] = "esperant_resolucio"
             response = "Ostres, em sap greu sentir això! 😟 Que et faltin coses és el que menys volem. No et preocupis, estic obrint un tiquet d'incidència ara mateix per solucionar-ho. Vols que et tornem els diners de la part faltant o prefereixes que te'ls portem de nou?"
 
+        elif intent == "resolucio_diners":
+            self.sessions_context[session_id] = None # Tanquem context
+            response = "Entès! 💸 Acabo de tramitar el reemborsament de l'import proporcional. Ho veuràs reflectit al teu compte en un màxim de 48 hores. Sento molt les molèsties!"
+
+        elif intent == "resolucio_producte":
+            self.sessions_context[session_id] = None # Tanquem context
+            response = "D'acord! 🛵 Ja he avisat al repartidor més proper perquè et porti els productes que falten. Arribarà en uns 10-15 minuts. Gràcies per la teva paciència!"
+
         elif intent == "salutacio":
+            response = "Hola! Què tal? 😊 Sóc l'assistent de Glovo. En què et puc ajudar avui per fer-te la vida una mica més fàcil?"
+        
+        elif intent == "comanda_status":
             response = "Hola! Què tal? 😊 Sóc l'assistent de Glovo. En què et puc ajudar avui per fer-te la vida una mica més fàcil?"
         
         elif intent == "comanda_status":
