@@ -38,13 +38,15 @@ class GlovoChatbot:
             elif any(w in lower_text for w in ["portem", "traer", "nou", "nuevo", "enviar", "repetir"]):
                 return "resolucio_producte", entities
 
-        # Diccionari d'intents avançat (ordenat per rellevància)
+        # Diccionari d'intents avançat (ordenat per prioritat semàntica)
         intents_config = [
-            ("retard", ["tarde", "retraso", "demora", "no llega", "no arriba", "tarda"]),
+            ("retard", ["tarde", "retraso", "demora", "no llega", "no arriba", "tarda", "demasiado"]),
             ("incidencia", ["falta", "faltan", "malament", "mal", "equivocat", "equivocado", "reclamar", "problema", "no és"]),
             ("salutacio", ["hola", "buenos dias", "bon dia", "bones", "hey", "qué tal", "que tal"]),
-            ("comanda_status", ["comanda", "pedido", "estat", "order", "arriba", "on està", "dónde está", "seguiment"]),
-            ("preu_info", ["preu", "precio", "cost", "quant", "cuanto", "tarif", "valer", "vale"]),
+            # Estat de la comanda (prioritat sobre preus quan es pregunta pel temps)
+            ("comanda_status", ["comanda", "pedido", "estat", "order", "arriba", "on està", "dónde está", "seguiment", "queda", "falta", "cuánto le", "cuanto le", "donde", "lligues"]),
+            # Preus (fem que 'cuanto' per si sol no sigui suficient si no hi ha kws de preu)
+            ("preu_info", ["preu", "precio", "cost", "quant costa", "cuanto cuesta", "tarif", "valer", "vale", "diners"]),
             ("humor_fact", ["broma", "chiste", "curiositat", "curiosidad", "sabies", "sabías", "cuéntame algo"]),
             ("agraïment", ["gràcies", "gracias", "merci", "perfecte", "ok", "crack", "guay"]),
             ("comiat", ["adeu", "adiós", "ciao", "fins després", "bye", "chao"])
