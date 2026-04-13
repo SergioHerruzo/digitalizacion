@@ -30,23 +30,24 @@ class GlovoChatbot:
         entities = [(ent.text, ent.label_) for ent in doc.ents]
         lower_text = text.lower()
         
-        # Si tenim un context obert, certs intents canvien
+        # Gestió de CONTEXT (Prioritat màxima)
         context = self.sessions_context.get(session_id)
-        
         if context == "esperant_resolucio":
-            if any(w in lower_text for w in ["dinero", "diners", "tornem", "reembors", "reembolso"]):
+            if any(w in lower_text for w in ["dinero", "diners", "tornem", "reembors", "reembolso", "dame"]):
                 return "resolucio_diners", entities
-            elif any(w in lower_text for w in ["portem", "traer", "nou", "nuevo", "enviar"]):
+            elif any(w in lower_text for w in ["portem", "traer", "nou", "nuevo", "enviar", "repetir"]):
                 return "resolucio_producte", entities
 
-        # Diccionari de paraules clau per intents (ordenat per prioritat)
+        # Diccionari d'intents avançat (ordenat per rellevància)
         intents_config = [
-            ("incidencia", ["falta", "faltan", "malament", "mal", "equivocat", "equivocado", "reclamar", "problema", "no és el que he demanat"]),
-            ("salutacio", ["hola", "buenos dias", "bon dia", "bones", "hey", "qué tal"]),
-            ("comanda_status", ["comanda", "pedido", "estat", "order", "arriba", "on està", "dónde está"]),
-            ("preu_info", ["preu", "precio", "cost", "quant", "cuanto", "tarif"]),
-            ("agraïment", ["gràcies", "gracias", "merci", "perfecte", "ok"]),
-            ("comiat", ["adeu", "adiós", "ciao", "fins després"])
+            ("retard", ["tarde", "retraso", "demora", "no llega", "no arriba", "tarda"]),
+            ("incidencia", ["falta", "faltan", "malament", "mal", "equivocat", "equivocado", "reclamar", "problema", "no és"]),
+            ("salutacio", ["hola", "buenos dias", "bon dia", "bones", "hey", "qué tal", "que tal"]),
+            ("comanda_status", ["comanda", "pedido", "estat", "order", "arriba", "on està", "dónde está", "seguiment"]),
+            ("preu_info", ["preu", "precio", "cost", "quant", "cuanto", "tarif", "valer", "vale"]),
+            ("humor_fact", ["broma", "chiste", "curiositat", "curiosidad", "sabies", "sabías", "cuéntame algo"]),
+            ("agraïment", ["gràcies", "gracias", "merci", "perfecte", "ok", "crack", "guay"]),
+            ("comiat", ["adeu", "adiós", "ciao", "fins després", "bye", "chao"])
         ]
 
         detected_intent = "consulta_general"
@@ -58,77 +59,77 @@ class GlovoChatbot:
         return detected_intent, entities
 
     def estimate_time(self, location):
-        """Simula una estimació segons la ubicació."""
         loc_lower = location.lower()
-        if "barcelona" in loc_lower:
-            return random.randint(15, 25)
-        elif any(city in loc_lower for city in ["madrid", "valència", "sevilla", "bilbao"]):
-            return random.randint(25, 40)
+        if "barcelona" in loc_lower: return random.randint(15, 25)
+        if any(city in loc_lower for city in ["madrid", "valència", "sevilla"]): return random.randint(25, 40)
         return random.randint(20, 50)
 
     def respond(self, session_id, text):
         intent, entities = self.analyze_intent(text, session_id)
         locations = [e[0] for e in entities if e[1] == 'LOC']
         
-        # Respostes amb personalitat i cercania 💛
-        if intent == "incidencia":
+        # --- MOTOR DE RESPOSTES MINI-GEMINI ---
+        
+        if intent == "retard":
+            responses = [
+                f"Deixa'm que miri el mapa... 🗺️ Ostres, si que anem una mica tard per {locations[0] if locations else 'aquí'}. Hi ha una mica de trànsit, però el teu repartidor està fent tot el possible! Et demano una mica de paciència, et compensarem pel retard! 😉",
+                "Ostres! Sap greu la demora. ⏳ Estic consultant el GPS i veig que el repartidor està a pocs carrers. S'ha hagut de desviar una mica però arriba en breu. No et preocupis!"
+            ]
+            return random.choice(responses)
+
+        elif intent == "incidencia":
             self.sessions_context[session_id] = "esperant_resolucio"
-            response = "Ostres, em sap greu sentir això! 😟 Que et faltin coses és el que menys volem. No et preocupis, estic obrint un tiquet d'incidència ara mateix per solucionar-ho. Vols que et tornem els diners de la part faltant o prefereixes que te'ls portem de nou?"
+            return "Vaja, sap greu sentir això! 😟 Que et faltin coses no m'agrada gens. Estic obrint un tiquet d'incidència ara mateix. Digue'm, vols que et tornem els diners del que falta o prefereixes que te'ls portem de nou a casa?"
 
         elif intent == "resolucio_diners":
-            self.sessions_context[session_id] = None # Tanquem context
-            response = "Entès! 💸 Acabo de tramitar el reemborsament de l'import proporcional. Ho veuràs reflectit al teu compte en un màxim de 48 hores. Sento molt les molèsties!"
+            self.sessions_context[session_id] = None
+            return "Fet! 💸 Ja hem tramitat el reemborsament proporcional directament al teu compte. El tindràs en un màxim de 48h. Sento de nou el problema, et mereixes una bona experiència!"
 
         elif intent == "resolucio_producte":
-            self.sessions_context[session_id] = None # Tanquem context
-            response = "D'acord! 🛵 Ja he avisat al repartidor més proper perquè et porti els productes que falten. Arribarà en uns 10-15 minuts. Gràcies per la teva paciència!"
+            self.sessions_context[session_id] = None
+            return "D'acord! 🛵 Acabo d'avisar a un repartidor perquè et porti els productes que falten corrents. Arribarà en un obrir i tancar d'ulls! Gràcies per ser tan pacient amb nosaltres."
 
         elif intent == "salutacio":
-            response = "Hola! Què tal? 😊 Sóc l'assistent de Glovo. En què et puc ajudar avui per fer-te la vida una mica més fàcil?"
-        
-        elif intent == "comanda_status":
-            response = "Hola! Què tal? 😊 Sóc l'assistent de Glovo. En què et puc ajudar avui per fer-te la vida una mica més fàcil?"
+            salutacions = [
+                "Hola! Com va això? 😊 Sóc el teu assistent de Glovo, en què et puc ajudar avui?",
+                "Ei! Què tal et va el dia? Passava per aquí per si necessitaves qualsevol cosa amb la teva comanda. Digue'm!",
+                "Hola! Què et ve de gust avui? Tens alguna consulta o vols demanar alguna cosa?"
+            ]
+            return random.choice(salutacions)
         
         elif intent == "comanda_status":
             if locations:
                 time_est = self.estimate_time(locations[0])
-                response = f"D'acord! Veig que parles de {locations[0]}. 📍 Per aquesta zona el temps estimat és d'uns {time_est} minuts. El teu repartidor s'està preparant!"
+                return f"Mirant la teva zona de {locations[0]}... 📍 Veig que els lliuraments van ràpid, uns {time_est} minuts aproximadament. El teu repartidor està a punt per volar!"
             else:
-                response = "Estic mirant-ho ara mateix! 🔍 Segons el sistema, la teva comanda està en camí i arribarà molt aviat. Vols que t'ajudi amb la ubicació exacta?"
-        
+                return "Estic consultant la base de dades... 🔍 Veig que la teva comanda està en marxa i arribarà molt aviat. Si em dius la teva ciutat, et puc donar un temps més exacte!"
+
         elif intent == "preu_info":
-            response = "Mira, t'explico: els preus varien una mica segons la distància, però normalment per aquí el lliurament costa entre 1.50€ i 3€. Vols que calculi el preu de l'enviament per a la teva zona?"
+            return "Doncs mira, t'explico: el preu depèn de la distància, però sol rondar els 1.50€ - 3€. 💶 Ara mateix tenim algunes promocions, vols que et busqui codis de descompte?"
             
+        elif intent == "humor_fact":
+            facts = [
+                "Sabies que el producte més demanat a Glovo durant la pandèmia van ser els plàtans? 🍌 Curuós, oi?",
+                "Dada curiosa: La comanda més gran de la història de Glovo va portar més de 100 hamburgueses per una festa! 🍔 Vaja gana!",
+                "Un acudit? Per què els de Glovo no juguen a l'amagatall? Perquè sempre els acaben trobant pel GPS! 😂 (Molt dolent, ho sé...)"
+            ]
+            return random.choice(facts)
+
         elif intent == "agraïment":
-            response = "No es mereixen! 🙌 M'encanta poder ajudar-te. Tens cap altra dubte o ja està tot a punt?"
+            return "De res! 🙌 Ja saps on sóc si em necessites. Disfruta de la comanda!"
             
         elif intent == "comiat":
-            response = "Que vagi molt bé! Fins la propera vegada que tinguis gana o necessitis qualsevol cosa. 👋"
+            return "Vinga, que vagi molt bé! Fins la propera vegada que tinguis gana! 👋"
             
         else:
-            # Fallback contextual
+            # Fallback amb estil "Gemini"
             if locations:
                 time_est = self.estimate_time(locations[0])
-                response = f"Oh, veig que estàs per {locations[0]}! 🌍 Sabies que allà el temps de lliurament és de només {time_est} minuts? Què t'agradaria demanar?"
+                return f"Entenc que em parles de {locations[0]} 🌍. Encara estic aprenent, però sé que allà entreguem en uns {time_est} minuts. Però... exactament què necessites saber?"
             elif len(text.split()) > 1:
-                response = f"Molt interessant el que dius... 🤔 Sembla que em parles de '{text.split()[0]}', però encara estic aprenent. Em podries donar una mica més de context?"
+                return f"M'estàs explicant una cosa molt interessant sobre '{text.split()[0]}'... 🤔 Però encara sóc un bot jove i no et segueixo del tot. Em preguntaves per una comanda, pel preu o volies que t'expliqués una curiositat?"
             else:
-                response = "Em sap greu, no estic segur de com ajudar-te amb això encara 😅. Pots preguntar-me per la teva comanda, preus o dir-me on et trobes!"
-
-        self.save_to_history(session_id, text, response)
-        return response
-
-    def save_to_history(self, session_id, user_text, bot_response):
-        if self.table:
-            try:
-                self.table.put_item(
-                    Item={
-                        'SessionID': session_id, 'Timestamp': int(time.time()),
-                        'UserText': user_text, 'BotResponse': bot_response,
-                        'Date': datetime.now().isoformat()
-                    }
-                )
-            except: pass
+                return "Ostres, no t'he acabat d'entendre 😅. Pots preguntar-me on està el teu pedido, què costa l'enviament o simplement saludar-me!"
 
 # Inicialització de Flask
 app = Flask(__name__, static_folder='.')
@@ -153,10 +154,9 @@ def chat():
 
 if __name__ == "__main__":
     print("\n" + "="*50)
-    print("🚀 PROYECTO GLOVO: TRANSFORMACIÓN DIGITAL (VERSIÓ PRO)")
+    print("🚀 GLOVO CHATBOT: VERSIÓ MINI-GEMINI")
     print("="*50)
     print("Servidor actiu a: http://localhost:5000")
-    print("To de veu: Proper i amable 😊")
-    print("Localització focus: Barcelona 📍")
+    print("Estil: Modern i proper (Tuteig) 😊")
     print("="*50 + "\n")
     app.run(port=5000, debug=False)
