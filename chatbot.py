@@ -29,17 +29,18 @@ class GlovoChatbot:
         
         lower_text = text.lower()
         
-        # Diccionari de paraules clau per intents
-        intents = {
-            "salutacio": ["hola", "buenos dias", "bon dia", "bones", "hey", "qué tal"],
-            "comanda_status": ["comanda", "pedido", "estat", "order", "arriba", "on està", "dónde está"],
-            "preu_info": ["preu", "precio", "cost", "quant", "cuanto", "tarif"],
-            "agraïment": ["gràcies", "gracias", "merci", "perfecte", "ok"],
-            "comiat": ["adeu", "adiós", "ciao", "fins després"]
-        }
+        # Diccionari de paraules clau per intents (ordenat per prioritat)
+        intents_config = [
+            ("incidencia", ["falta", "faltan", "malament", "mal", "equivocat", "equivocado", "reclamar", "problema", "no és el que he demanat"]),
+            ("salutacio", ["hola", "buenos dias", "bon dia", "bones", "hey", "qué tal"]),
+            ("comanda_status", ["comanda", "pedido", "estat", "order", "arriba", "on està", "dónde está"]),
+            ("preu_info", ["preu", "precio", "cost", "quant", "cuanto", "tarif"]),
+            ("agraïment", ["gràcies", "gracias", "merci", "perfecte", "ok"]),
+            ("comiat", ["adeu", "adiós", "ciao", "fins després"])
+        ]
 
         detected_intent = "consulta_general"
-        for intent, keywords in intents.items():
+        for intent, keywords in intents_config:
             if any(kw in lower_text for kw in keywords):
                 detected_intent = intent
                 break
@@ -60,7 +61,10 @@ class GlovoChatbot:
         locations = [e[0] for e in entities if e[1] == 'LOC']
         
         # Respostes amb personalitat i cercania 💛
-        if intent == "salutacio":
+        if intent == "incidencia":
+            response = "Ostres, em sap greu sentir això! 😟 Que et faltin coses és el que menys volem. No et preocupis, estic obrint un tiquet d'incidència ara mateix per solucionar-ho. Vols que et tornem els diners de la part faltant o prefereixes que te'ls portem de nou?"
+
+        elif intent == "salutacio":
             response = "Hola! Què tal? 😊 Sóc l'assistent de Glovo. En què et puc ajudar avui per fer-te la vida una mica més fàcil?"
         
         elif intent == "comanda_status":
