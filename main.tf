@@ -52,10 +52,66 @@ resource "aws_instance" "chatbot_engine" {
   # Ús obligatori del LabRole existent a AWS Academy
   iam_instance_profile = "LabInstanceProfile"
 
+  # Assignació del grup de seguretat
+  vpc_security_group_ids = [aws_security_group.chatbot_sg.id]
+
+  # Script d'arrencada (User Data)
+  user_data = <<-EOF
+              #!/bin/bash
+              # Actualització i instal·lació de dependències de sistema
+              yum update -y
+              yum install -y python3-pip git
+
+              # Clonatge del repositori usant el token d'accés
+              cd /home/ec2-user
+              git clone https://${var.github_token}@${replace(var.github_repository, "https://", "")} app
+              cd app
+
+              # Instal·lació de dependències de Python
+              pip3 install -r requirements.txt
+              python3 -m spacy download es_core_news_md
+
+              # Execució del backend en segon pla
+              nohup python3 chatbot.py > chatbot.log 2>&1 &
+              EOF
+
   tags = {
     Name        = "Glovo-Chatbot-Server"
     Project     = "Transformacio-Digital"
     Environment = "Acadèmic"
+  }
+}
+
+# Grup de Seguretat per permetre trànsit al xatbot i SSH
+resource "aws_security_group" "chatbot_sg" {
+  name        = "glovo-chatbot-sg"
+  description = "Permetre port 5000 per al backend i 22 per SSH"
+
+  ingress {
+    from_port   = 5000
+    to_port     = 5000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Flask API"
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "SSH Access"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "Glovo-Security-Group"
   }
 }
 
