@@ -25,12 +25,28 @@ variable "github_token" {
   type        = string
   description = "Token d'accés personal de GitHub"
   sensitive   = true
-  default     = "dummy_token" # L'usuari l'haurà de sobreescriure
+  # S'ha eliminat el default per evitar errors 401. L'usuari l'ha de passar via CLI o tfvars.
+}
+
+# Obtenció dinàmica de la darrera AMI d'Amazon Linux 2023
+data "aws_ami" "amazon_linux_2023" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*-x86_64"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
 }
 
 # 1. Instància EC2 per al motor de Python (Chatbot)
 resource "aws_instance" "chatbot_engine" {
-  ami           = "ami-04403f33f0c055235" # Amazon Linux 2023 AMI a us-east-1
+  ami           = data.aws_ami.amazon_linux_2023.id
   instance_type = "t2.micro"
   
   # Ús obligatori del LabRole existent a AWS Academy
