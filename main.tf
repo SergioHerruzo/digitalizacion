@@ -71,7 +71,8 @@ resource "aws_instance" "chatbot_engine" {
               pip3 install -r requirements.txt
               python3 -m spacy download es_core_news_md
 
-              # Execució del backend en segon pla
+              # Execució del backend en segon pla (passant el nom de la taula)
+              export DYNAMODB_TABLE="${aws_dynamodb_table.conversations.name}"
               nohup python3 chatbot.py > chatbot.log 2>&1 &
               EOF
 
@@ -129,7 +130,7 @@ resource "random_id" "suffix" {
 
 # 3. Taula DynamoDB per a la persistència de converses
 resource "aws_dynamodb_table" "conversations" {
-  name           = "GlovoChatHistory"
+  name           = "GlovoChatHistory-${random_id.suffix.hex}"
   billing_mode   = "PAY_PER_REQUEST"
   hash_key       = "SessionID"
   range_key      = "Timestamp"

@@ -21,7 +21,10 @@ class GlovoChatbot:
         self.sessions_context = {} 
         try:
             self.dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
-            self.table = self.dynamodb.Table('GlovoChatHistory')
+            # Intentem llegir el nom de la taula de les variables d'entorn
+            import os
+            table_name = os.environ.get('DYNAMODB_TABLE', 'GlovoChatHistory')
+            self.table = self.dynamodb.Table(table_name)
         except:
             self.table = None
             
