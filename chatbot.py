@@ -1,5 +1,6 @@
 import spacy
 import boto3
+import json
 import time
 import os
 import random
@@ -23,6 +24,18 @@ class GlovoChatbot:
             self.table = self.dynamodb.Table('GlovoChatHistory')
         except:
             self.table = None
+            
+        # Banc de preguntes freqüents (FAQ)
+        self.faq_bank = []
+        self.faq_docs = []
+        try:
+            with open('faq.json', 'r', encoding='utf-8') as f:
+                self.faq_bank = json.load(f)
+            # Pre-processem les preguntes per a més velocitat en la similitud
+            if nlp:
+                self.faq_docs = [(nlp(item['question']), item['answer']) for item in self.faq_bank]
+        except Exception as e:
+            print(f"Error carregant el banc de FAQs: {e}")
 
     def analyze_intent(self, text, session_id):
         if not nlp: return "error_model", []
@@ -59,6 +72,26 @@ class GlovoChatbot:
                 break
             
         return detected_intent, entities
+
+    def find_faq_answer(self, text):
+        if not nlp or not self.faq_docs:
+            return None
+            
+        user_doc = nlp(text)
+        best_match = None
+        highest_similarity = 0
+        
+        for faq_doc, answer in self.faq_docs:
+            sim = user_doc.similarity(faq_doc)
+            if sim > highest_similarity:
+                highest_similarity = sim
+                best_match = answer
+        
+        # Llindar de similitud (0.75 sembla raonable per a frases curtes)
+        if highest_similarity > 0.75:
+            return best_match
+            
+        return None
 
     def estimate_time(self, location):
         loc_lower = location.lower()
@@ -124,6 +157,11 @@ class GlovoChatbot:
             return "Vinga, que vagi molt bé! Fins la propera vegada que tinguis gana! 👋"
             
         else:
+            # Abans de donar el fallback, intentem buscar al banc de FAQs
+            faq_answer = self.find_faq_answer(text)
+            if faq_answer:
+                return faq_answer
+
             # Fallback amb estil "Gemini"
             if locations:
                 time_est = self.estimate_time(locations[0])

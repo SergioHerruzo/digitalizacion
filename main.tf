@@ -14,6 +14,20 @@ provider "aws" {
   region = "us-east-1"
 }
 
+# Variables per a Amplify
+variable "github_repository" {
+  type        = string
+  description = "URL del repositori de GitHub (ex: https://github.com/usuari/repo)"
+  default     = "https://github.com/SergioHerruzo/digitalizacion"
+}
+
+variable "github_token" {
+  type        = string
+  description = "Token d'accés personal de GitHub"
+  sensitive   = true
+  default     = "dummy_token" # L'usuari l'haurà de sobreescriure
+}
+
 # 1. Instància EC2 per al motor de Python (Chatbot)
 resource "aws_instance" "chatbot_engine" {
   ami           = "ami-04403f33f0c055235" # Amazon Linux 2023 AMI a us-east-1
@@ -61,6 +75,46 @@ resource "aws_dynamodb_table" "conversations" {
   tags = {
     Name = "Glovo-Chat-Persistence"
   }
+}
+
+# 4. AWS Amplify per al Frontend (SPA)
+resource "aws_amplify_app" "glovo_frontend" {
+  name       = "Glovo-Digital-Frontend"
+  repository = var.github_repository
+  
+  # Token d'accés per connectar amb GitHub
+  access_token = var.github_token
+
+  # Configuració de build bàsica per a una web estàtica
+  build_spec = <<-EOT
+    version: 1
+    frontend:
+      phases:
+        build:
+          commands: []
+      artifacts:
+        baseDirectory: /
+        files:
+          - '**/*'
+      cache:
+        paths: []
+  EOT
+
+  environment_variables = {
+    ENV = "production"
+  }
+}
+
+resource "aws_amplify_branch" "main" {
+  app_id      = aws_amplify_app.glovo_frontend.id
+  branch_name = "main"
+
+  framework = "Web"
+  stage     = "PRODUCTION"
+}
+
+output "amplify_app_url" {
+  value = aws_amplify_app.glovo_frontend.default_domain
 }
 
 output "chatbot_public_ip" {

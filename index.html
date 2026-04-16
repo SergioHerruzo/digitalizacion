@@ -3,59 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Glovo | Transformació Digital</title>
+    <title>Glovo | Què vols avui? | Transformació Digital</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="app-container">
         <header>
-            <div class="logo">
-                <span class="glovo-yellow">Glovo</span> <span class="tag">Digital</span>
+            <div class="logo-container">
+                <span class="logo-text">Glovo</span>
+                <span class="logo-badge">IA</span>
             </div>
             <nav>
                 <ul>
                     <li>Inici</li>
-                    <li>Comandes</li>
+                    <li>Restauració</li>
+                    <li>Supermercat</li>
                     <li>Perfil</li>
                 </ul>
             </nav>
         </header>
 
         <main>
+            <!-- Hero Section -->
             <section class="hero">
-                <h1>Lliuraments intel·ligents amb IA</h1>
-                <p>Explora com la transformació digital millora la teva experiència.</p>
+                <h1>El teu món,<br>a domicili</h1>
+                <p>Menjar, farmàcia, regals... el que necessitis en un obrir i tancar d'ulls.</p>
+                <div class="search-container">
+                    <input type="text" placeholder="Què estàs buscant avui?">
+                    <button>Explora</button>
+                </div>
             </section>
 
-            <section class="chat-interface" id="chat-win">
-                <div class="chat-header">
-                    <h3>Assistent Intencions (Python Engine)</h3>
-                    <span class="status-dot"></span>
+            <!-- Product Categories -->
+            <section class="categories">
+                <div class="category-card">
+                    <span class="category-icon">🍔</span>
+                    <h3>Restauració</h3>
                 </div>
-                <div class="chat-body" id="chat-body">
-                    <div class="message bot">Hola! Com puc ajudar-te amb la teva comanda avui?</div>
+                <div class="category-card">
+                    <span class="category-icon">🛒</span>
+                    <h3>Supermercat</h3>
                 </div>
-                <div class="chat-input-area">
-                    <input type="text" placeholder="Escriu la teva consulta..." id="user-input">
-                    <button id="send-btn">Enviar</button>
+                <div class="category-card">
+                    <span class="category-icon">💊</span>
+                    <h3>Farmàcia</h3>
+                </div>
+                <div class="category-card">
+                    <span class="category-icon">🎁</span>
+                    <h3>Regals</h3>
+                </div>
+                <div class="category-card">
+                    <span class="category-icon">🥤</span>
+                    <h3>Begudes</h3>
+                </div>
+                <div class="category-card">
+                    <span class="category-icon">✨</span>
+                    <h3>Personalitzat</h3>
                 </div>
             </section>
         </main>
 
-        <footer>
-            <p>&copy; 2026 Glovo Academy Learner Lab Project</p>
+        <footer class="main-footer">
+            <div class="footer-content">
+                <span class="footer-logo">Glovo</span>
+                <p>Projecte de Transformació Digital © 2026</p>
+            </div>
         </footer>
     </div>
+
+    <!-- Chatbot Floating Button -->
+    <div id="chat-toggle-btn">
+        <svg viewBox="0 0 24 24">
+            <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2M20 16H5.2L4 17.2V4H20V16M17 11H15V9H17V11M13 11H11V9H13V11M9 11H7V9H9V11Z"/>
+        </svg>
+    </div>
+
+    <!-- Chatbot Window -->
+    <div class="chat-widget" id="chat-widget">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <div class="bot-avatar">🤖</div>
+                <div class="chat-header-text">
+                    <h3>Glovo Assistent</h3>
+                    <span>En línia</span>
+                </div>
+            </div>
+            <button class="close-chat" id="close-chat">&times;</button>
+        </div>
+        <div class="chat-body" id="chat-body">
+            <div class="message bot">Hola! 👋 Soc el teu assistent intel·ligent. En què et puc ajudar amb la teva comanda avui?</div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="user-input" placeholder="Pregunta qualsevol cosa...">
+            <button id="send-btn">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                    <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
     <script>
+        const chatWidget = document.getElementById('chat-widget');
+        const toggleBtn = document.getElementById('chat-toggle-btn');
+        const closeBtn = document.getElementById('close-chat');
         const chatBody = document.getElementById('chat-body');
         const input = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        // Toggle Chat
+        toggleBtn.addEventListener('click', () => {
+            chatWidget.classList.add('active');
+        });
+
+        closeBtn.addEventListener('click', () => {
+            chatWidget.classList.remove('active');
+        });
 
         const sendMessage = async () => {
             const text = input.value.trim();
             if (text === '') return;
             
-            // Missatge usuari
+            // Add User Message
             const userMsg = document.createElement('div');
             userMsg.className = 'message user';
             userMsg.innerText = text;
@@ -64,14 +134,15 @@
             input.value = '';
             chatBody.scrollTop = chatBody.scrollHeight;
 
-            // Simulació de "pensant"
+            // Add Typing Placeholder
             const typingMsg = document.createElement('div');
             typingMsg.className = 'message bot';
-            typingMsg.innerText = "...";
+            typingMsg.innerText = "Pensant...";
             chatBody.appendChild(typingMsg);
+            chatBody.scrollTop = chatBody.scrollHeight;
 
             try {
-                // Crida real a l'API de Python (Flask)
+                // Local API Call (Backend must be running)
                 const response = await fetch('http://localhost:5000/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -81,14 +152,14 @@
                 const data = await response.json();
                 typingMsg.innerText = data.reply;
             } catch (error) {
-                typingMsg.innerText = "Error: El servidor de Python no està actiu. Executa 'python chatbot.py' primer.";
-                console.error("Error connectant amb el backend:", error);
+                typingMsg.innerText = "Error: El servidor de Python no està actiu. Assegura't d'executar el backend.";
+                console.error("Error:", error);
             }
             
             chatBody.scrollTop = chatBody.scrollHeight;
         };
 
-        document.getElementById('send-btn').addEventListener('click', sendMessage);
+        sendBtn.addEventListener('click', sendMessage);
         input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
         });

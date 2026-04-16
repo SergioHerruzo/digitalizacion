@@ -1,0 +1,34 @@
+[
+  {
+    "question": "¿Qué es Glovo Prime?",
+    "answer": "Glovo Prime és el nostre servei de subscripció mensual que et permet gaudir de lliuraments gratuïts il·limitats en establiments seleccionats i promocions exclusives. ¡Ideal si demanes sovint! 🚀"
+  },
+  {
+    "question": "¿Cómo puedo cancelar mi pedido?",
+    "answer": "Pots cancel·lar la teva comanda directament des de l'app si encara no ha estat acceptada per l'establiment. Si ja està en preparació o en camí, contacta amb el nostre suport immediatament des de la secció d'ajuda. ✋"
+  },
+  {
+    "question": "Quiero ser repartidor (Glover), ¿cómo lo hago?",
+    "answer": "¡Genial! Pots registrar-te a la nostra web de couriers (repartidores.glovoapp.com). Només cal que siguis major d'edat, tinguis vehicle propi i els documents en regla. T'esperem a l'equip! 🚲"
+  },
+  {
+    "question": "¿A qué ciudades enviáis?",
+    "answer": "Glovo està present a centenars de ciutats de més de 20 països. Pots consultar si arribem a la teva zona introduint la teva adreça a la pantalla principal de l'app o web. 🌍"
+  },
+  {
+    "question": "¿Puedo pedir en varias tiendas a la vez?",
+    "answer": "Actualment, cada comanda ha de ser d'un sol establiment. Si vols productes de diverses botigues, hauràs de fer comandes separades (cadascuna amb el seu cost d'enviament). 🛍️"
+  },
+  {
+    "question": "¿Qué métodos de pago aceptáis?",
+    "answer": "Acceptem targetes de crèdit/dèbit (Visa, Mastercard, American Express), PayPal i, en algunes ciutats, pagament en efectiu al rebre la comanda. 💳"
+  },
+  {
+    "question": "Mi comida ha llegado fría",
+    "answer": "Ostres, sap greu! 😟 La qualitat del menjar és super important. Si us plau, obre una incidència des de l'app a l'apartat de 'Ajuda' amb el teu pedido actual i buscarem una solució immediata."
+  },
+  {
+    "question": "¿Cómo cambio mi dirección de entrega?",
+    "answer": "Pots canviar l'adreça a la pantalla principal abans de fer la comanda. Si ja l'has fet, prova de contactar amb el repartidor o amb el suport el més ràpid possible! 📍"
+  }
+]
