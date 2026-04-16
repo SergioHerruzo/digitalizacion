@@ -142,8 +142,8 @@
             chatBody.scrollTop = chatBody.scrollHeight;
 
             try {
-                // Local API Call (Backend must be running)
-                const response = await fetch('http://localhost:5000/chat', {
+                // API Call (Automated by Amplify build)
+                const response = await fetch('http://__BACKEND_URL__/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text: text })

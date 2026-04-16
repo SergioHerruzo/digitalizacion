@@ -158,13 +158,14 @@ resource "aws_amplify_app" "glovo_frontend" {
   # Token d'accés per connectar amb GitHub
   access_token = var.github_token
 
-  # Configuració de build bàsica per a una web estàtica
+  # Configuració de build: Inyectamos la IP de la EC2 en el index.html
   build_spec = <<-EOT
     version: 1
     frontend:
       phases:
         build:
-          commands: []
+          commands:
+            - sed -i "s|__BACKEND_URL__|${aws_instance.chatbot_engine.public_ip}:5000|g" index.html
       artifacts:
         baseDirectory: /
         files:
