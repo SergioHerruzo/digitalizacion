@@ -58,22 +58,33 @@ resource "aws_instance" "chatbot_engine" {
   # Script d'arrencada (User Data)
   user_data = <<-EOF
               #!/bin/bash
-              # Actualització i instal·lació de dependències de sistema
+              # 1. Preparació del sistema
               yum update -y
               yum install -y python3-pip git
 
-              # Clonatge del repositori usant el token d'accés
-              cd /home/ec2-user
-              git clone https://${var.github_token}@${replace(var.github_repository, "https://", "")} app
-              cd app
+              # 2. Configuració de l'espai de treball
+              mkdir -p /home/ec2-user/app
+              cd /home/ec2-user/app
 
-              # Instal·lació de dependències de Python
-              pip3 install -r requirements.txt
-              python3 -m spacy download es_core_news_md
+              # 3. Descàrrega del codi (neteja prèvia per seguretat)
+              rm -rf ./*
+              git clone https://${var.github_token}@${replace(var.github_repository, "https://", "")} .
 
-              # Execució del backend en segon pla (passant el nom de la taula)
+              # 4. Gestió de l'entorn Python (venv)
+              python3 -m venv venv
+              source venv/bin/activate
+
+              # 5. Instal·lació de dependències
+              pip install --upgrade pip
+              pip install -r requirements.txt
+              python -m spacy download es_core_news_md
+
+              # 6. Correcció de permisos per a l'usuari ec2-user
+              chown -R ec2-user:ec2-user /home/ec2-user/app
+
+              # 7. Execució del backend en segon pla (usant la variable de la taula)
               export DYNAMODB_TABLE="${aws_dynamodb_table.conversations.name}"
-              nohup python3 chatbot.py > chatbot.log 2>&1 &
+              nohup venv/bin/python chatbot.py > /home/ec2-user/app/chatbot.log 2>&1 &
               EOF
 
   tags = {

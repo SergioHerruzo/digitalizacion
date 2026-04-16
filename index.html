@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ca">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div class="app-container">
         <header>
@@ -75,7 +77,8 @@
     <!-- Chatbot Floating Button -->
     <div id="chat-toggle-btn">
         <svg viewBox="0 0 24 24">
-            <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2M20 16H5.2L4 17.2V4H20V16M17 11H15V9H17V11M13 11H11V9H13V11M9 11H7V9H9V11Z"/>
+            <path
+                d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2M20 16H5.2L4 17.2V4H20V16M17 11H15V9H17V11M13 11H11V9H13V11M9 11H7V9H9V11Z" />
         </svg>
     </div>
 
@@ -92,13 +95,14 @@
             <button class="close-chat" id="close-chat">&times;</button>
         </div>
         <div class="chat-body" id="chat-body">
-            <div class="message bot">Hola! 👋 Soc el teu assistent intel·ligent. En què et puc ajudar amb la teva comanda avui?</div>
+            <div class="message bot">Hola! 👋 Soc el teu assistent intel·ligent. En què et puc ajudar amb la teva
+                comanda avui?</div>
         </div>
         <div class="chat-footer">
             <input type="text" id="user-input" placeholder="Pregunta qualsevol cosa...">
             <button id="send-btn">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
-                    <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/>
+                    <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z" />
                 </svg>
             </button>
         </div>
@@ -124,13 +128,13 @@
         const sendMessage = async () => {
             const text = input.value.trim();
             if (text === '') return;
-            
+
             // Add User Message
             const userMsg = document.createElement('div');
             userMsg.className = 'message user';
             userMsg.innerText = text;
             chatBody.appendChild(userMsg);
-            
+
             input.value = '';
             chatBody.scrollTop = chatBody.scrollHeight;
 
@@ -148,14 +152,14 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text: text })
                 });
-                
+
                 const data = await response.json();
                 typingMsg.innerText = data.reply;
             } catch (error) {
                 typingMsg.innerText = "Error: El servidor de Python no està actiu. Assegura't d'executar el backend.";
                 console.error("Error:", error);
             }
-            
+
             chatBody.scrollTop = chatBody.scrollHeight;
         };
 
@@ -165,4 +169,5 @@
         });
     </script>
 </body>
+
 </html>
